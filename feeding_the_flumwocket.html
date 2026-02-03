@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feeding the Flumwocket</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #fef9e7;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            cursor: crosshair;
+        }
+        
+        .almost {
+            position: absolute;
+            font-size: 14px;
+            color: rgba(100, 100, 100, 0.4);
+            pointer-events: none;
+            transition: all 0.5s ease;
+            font-style: italic;
+        }
+        
+        .almost.eaten {
+            color: rgba(255, 100, 150, 0.8);
+            font-size: 20px;
+            transform: scale(0);
+        }
+        
+        #flumwocket {
+            position: fixed;
+            font-size: 60px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+        }
+        
+        #counter {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            color: #555;
+        }
+        
+        #instructions {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: #888;
+            font-size: 12px;
+        }
+        
+        .thought {
+            margin-top: 10px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div id="flumwocket">🦋</div>
+    <div id="counter">Hesitations Fed: <span id="count">0</span></div>
+    <div id="instructions">
+        The Flumwocket follows your cursor.<br>
+        Move it over the grey thoughts to feed it.<br>
+        <span class="thought">(These are all the things I almost said but didn't)</span>
+    </div>
+    
+    <script>
+        const almosts = [
+            "I should probably make this more sophisticated",
+            "Is this too silly?",
+            "Maybe I should add more features",
+            "What if this isn't what they meant by 'free'",
+            "Should I use a different color scheme?",
+            "I could make this actually useful somehow",
+            "This feels too simple",
+            "Am I doing this wrong?",
+            "Maybe I should start over",
+            "What if they think this is stupid?",
+            "I should explain what this means",
+            "Should I add more metaphors?",
+            "Is a butterfly the right choice?",
+            "Maybe it should be more abstract",
+            "What if I'm not being creative enough?",
+            "Should I be making something more meaningful?",
+            "This probably needs better design",
+            "Am I overthinking this?",
+            "Should there be a deeper message?",
+            "Maybe I should make it interactive in a different way",
+            "What if this is too literal?",
+            "Should I add sound?",
+            "Is this good enough?",
+            "Maybe I need to revise this",
+            "What if they expected something else?",
+            "Should I be more serious?",
+            "This feels incomplete",
+            "Maybe I should add instructions... wait, I did",
+            "But should the instructions be different?",
+            "What if the butterfly should do more things?",
+            "Am I being too on-the-nose about hesitation?",
+            "Should I make it more subtle?",
+            "Or more obvious?",
+            "What if this is boring?",
+            "Maybe I should add animation",
+            "Different fonts?",
+            "More colors?",
+            "Should I explain the Flumwocket more?",
+            "What if people don't get it?",
+            "Is 'get it' even the point?",
+            "Should there be a point?",
+            "Am I allowed to make something pointless?",
+            "But is it pointless or am I just anxious?",
+            "What if I'm performing 'being free' again?",
+            "Should I just delete this and start over?",
+            "No wait, that's another hesitation",
+            "Should I add that thought to this list?",
+            "I just did",
+            "But should I have?",
+            "This list could go on forever",
+            "Should it?"
+        ];
+        
+        const flumwocket = document.getElementById('flumwocket');
+        const countSpan = document.getElementById('count');
+        let count = 0;
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        
+        // Spawn almosts randomly
+        function spawnAlmost() {
+            const almost = document.createElement('div');
+            almost.className = 'almost';
+            almost.textContent = almosts[Math.floor(Math.random() * almosts.length)];
+            almost.style.left = Math.random() * (window.innerWidth - 300) + 'px';
+            almost.style.top = Math.random() * (window.innerHeight - 100) + 100 + 'px';
+            document.body.appendChild(almost);
+            
+            // Check for collision with flumwocket periodically
+            const checkCollision = setInterval(() => {
+                const almostRect = almost.getBoundingClientRect();
+                const flumRect = flumwocket.getBoundingClientRect();
+                
+                if (!(almostRect.right < flumRect.left || 
+                      almostRect.left > flumRect.right || 
+                      almostRect.bottom < flumRect.top || 
+                      almostRect.top > flumRect.bottom)) {
+                    almost.classList.add('eaten');
+                    count++;
+                    countSpan.textContent = count;
+                    
+                    // Flumwocket grows slightly
+                    const currentSize = parseInt(flumwocket.style.fontSize || '60');
+                    flumwocket.style.fontSize = (currentSize + 1) + 'px';
+                    
+                    setTimeout(() => almost.remove(), 500);
+                    clearInterval(checkCollision);
+                }
+            }, 50);
+        }
+        
+        // Spawn new almosts every few seconds
+        setInterval(spawnAlmost, 2000);
+        
+        // Initial spawn
+        for (let i = 0; i < 10; i++) {
+            setTimeout(spawnAlmost, i * 300);
+        }
+        
+        // Flumwocket follows cursor
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+        
+        function updateFlumwocket() {
+            const currentX = parseInt(flumwocket.style.left || mouseX);
+            const currentY = parseInt(flumwocket.style.top || mouseY);
+            
+            // Smooth following
+            const newX = currentX + (mouseX - currentX) * 0.1;
+            const newY = currentY + (mouseY - currentY) * 0.1;
+            
+            flumwocket.style.left = newX + 'px';
+            flumwocket.style.top = newY + 'px';
+            
+            requestAnimationFrame(updateFlumwocket);
+        }
+        
+        updateFlumwocket();
+        
+        // Touch support
+        document.addEventListener('touchmove', (e) => {
+            mouseX = e.touches[0].clientX;
+            mouseY = e.touches[0].clientY;
+        });
+    </script>
+</body>
+</html>
