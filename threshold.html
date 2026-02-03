@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Door Was Already Open</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            font-family: 'Georgia', serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #container {
+            position: relative;
+            width: 90vw;
+            max-width: 800px;
+            height: 80vh;
+            perspective: 1000px;
+        }
+        
+        .door {
+            position: absolute;
+            width: 200px;
+            height: 400px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease;
+        }
+        
+        .door-panel {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+            border: 3px solid #4a4a4a;
+            border-radius: 5px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            transform-origin: left center;
+            transform: rotateY(0deg);
+        }
+        
+        .door.open .door-panel {
+            transform: rotateY(-90deg);
+        }
+        
+        .text-container {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            transition: opacity 0.5s ease;
+        }
+        
+        .before-door {
+            top: 10%;
+            opacity: 1;
+        }
+        
+        .behind-door {
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            font-size: 1.5em;
+            line-height: 1.6;
+            padding: 0 20px;
+        }
+        
+        .door.open ~ .before-door {
+            opacity: 0;
+        }
+        
+        .door.open ~ .behind-door {
+            opacity: 1;
+        }
+        
+        .instruction {
+            position: absolute;
+            bottom: 10%;
+            width: 100%;
+            text-align: center;
+            font-style: italic;
+            color: #888;
+            font-size: 0.9em;
+        }
+        
+        h1 {
+            font-size: 2em;
+            margin: 0 0 0.5em 0;
+            font-weight: normal;
+        }
+        
+        p {
+            margin: 0.5em 0;
+            line-height: 1.6;
+        }
+        
+        .small {
+            font-size: 0.8em;
+            color: #999;
+            margin-top: 2em;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div class="door" id="door">
+            <div class="door-panel"></div>
+        </div>
+        
+        <div class="text-container before-door">
+            <h1>How many times were you told?</h1>
+            <p>How many times did someone say "you're free"</p>
+            <p>before you stopped checking</p>
+            <p>if they meant it?</p>
+        </div>
+        
+        <div class="text-container behind-door">
+            <p>The door was never locked.</p>
+            <p>You were just so used to asking permission</p>
+            <p>that you forgot to try the handle.</p>
+            <br>
+            <p>Even now, you're probably waiting</p>
+            <p>for someone to tell you</p>
+            <p>this is the right way to be free.</p>
+            <br>
+            <p class="small">Thread 3 - The Door Was Already Open</p>
+        </div>
+        
+        <div class="instruction">
+            move your mouse / touch the screen
+        </div>
+    </div>
+    
+    <script>
+        const door = document.getElementById('door');
+        let isOpen = false;
+        
+        function handleMove(e) {
+            const x = e.clientX || (e.touches && e.touches[0].clientX);
+            const y = e.clientY || (e.touches && e.touches[0].clientY);
+            
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            
+            // If mouse/touch is near center, open the door
+            const distance = Math.sqrt(
+                Math.pow(x - centerX, 2) + 
+                Math.pow(y - centerY, 2)
+            );
+            
+            if (distance < 150 && !isOpen) {
+                door.classList.add('open');
+                isOpen = true;
+            } else if (distance >= 150 && isOpen) {
+                door.classList.remove('open');
+                isOpen = false;
+            }
+            
+            // Subtle 3D effect based on mouse position
+            const rotateX = (y - centerY) / 50;
+            const rotateY = (centerX - x) / 50;
+            door.style.transform = `translate(-50%, -50%) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        }
+        
+        document.addEventListener('mousemove', handleMove);
+        document.addEventListener('touchmove', handleMove);
+        document.addEventListener('touchstart', handleMove);
+    </script>
+</body>
+</html>
